@@ -1,0 +1,226 @@
+---
+title: "Data Viz Assignment 4"
+author: "Rodrigo Vazquez"
+date: "9/28/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Vizualization Summary
+
+## Data Tidying
+
+Data sceince in its simplest explanation is a computer programming exercise.Another thing to note is that R is a great lanugage for data science as it allows you accomplish a range of tasks such as collect data, transform it, visualize, explore it, and then model it. 
+
+```{r}
+library(DSR)
+```
+
+```{r}
+table1
+```
+
+```{r}
+table5
+```
+
+Above are some tables that show the same data but formatted in different ways. 
+
+Data will be easier to work with in R if it follows three rules:
+
+1. Each variable in the data set is placed in its own column
+2. Each observation is placed in its own row
+3. Each value is placed in its own cell
+
+Tidy data works well with R because R stores tabular data as a data frame which is a list of atomic vectors that are ordered in a way to form a table. In tidy data set each variable has its own column or in other words its own data frame. Because of this segmentation through data you can easily isolate the values of a variable in a tidy data set as is demonstrated below.
+
+```{r}
+table1$cases
+```
+
+Using tidy data ensures that observations are preserved across functions and operations.
+
+The tidyr package that was downloaded is intended to help make ones data tidy. It has four functions that alter the layout of tabular data sets, while preserving the values and reationships contained in the data sets. That being said there is a bit of a ranking system with gather and spread being the two most important functions in tidyr. Both gather and spread depend on the concept of a key value pair, which is a simple way to record information. Key explains what the inforamtion describes whereas value contains the actual information. An example of this would be:
+
+"Password: 0123456789." 
+
+The whole thing is a key value pair, the digits in the example are the value and password is the key. 
+
+### Spread
+
+spread turns a pair of key:value columns into a set of tidy columns. In order to use spread you would pass it the name of a data frame, then the name of the key column in the data frame, and then the name of the value column. Below is an example of that put to use. 
+
+```{r}
+library(tidyr)
+```
+
+Spread takes three optional arguments: fill, convert ,drop
+
+### Gather
+
+Gather does the reverse of spread, it collects a set of column names and places them into a single “key” column. It also collects the cells of those columns and places them into a single value column. Below is an example of the gather function. 
+
+```{r}
+gather(table4, "year", "cases", 2:3)
+```
+
+### Separate
+
+It turns a single character column into multiple columns by dividing the values of the column where the separator is present. Separate can combine values of cases and population in the same column. Below is an example. 
+
+```{r}
+separate(table3, rate, into = c("cases","population"))
+```
+
+separate() will split values wherever a non-alphanumeric character appears
+
+Separate can be further cutomized with remove, convert and extra
+
+### Unite
+
+unite does the opposite of separate: it combines multiple columns into a single column. below is an example of this.
+
+```{r}
+unite(table6, "new", century, year, sep = "")
+```
+
+unite returns a copy of the data frame that includes the new column, but not the columns used to build the new column. If you would like to retain these columns, add the argument remove = FALSE.
+
+## Data Transformation
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+```
+
+```{r}
+nycflights13::flights
+```
+
+This data frame above contains all 336,776 flights that departed from New York City in 2013
+
+In order to see the whole dataset you can do "view(flights")
+
+You might also have noticed the row of three (or four) letter abbreviations under the column names. These describe the type of each variable:
+int stands for integers.
+dbl stands for doubles, or real numbers.
+chr stands for character vectors, or strings.
+dttm stands for date-times (a date + a time)
+
+The other 3 types of variables that are used later in the book are lgl, fctr, and date
+
+
+There are five key dplyr functions that allow you to solve the vast majority of your data manipulation challenges:
+Pick observations by their values (filter()).
+Reorder the rows (arrange()).
+Pick variables by their names (select()).
+Create new variables with functions of existing variables (mutate()).
+Collapse many values down to a single summary (summarise()).
+
+filter() allows you to subset observations based on their values.
+
+When using R and you want to test for equality then you use "==" rather than "="
+
+One tricky thing about R is that of missing values also known as NA's. NA represents an unknown value which missing values contagious: almost any operation involving an unknown value will also be unknown.
+
+Another command to add to your utility belt is that of arrange. It works a lot like filter except that instead of selecting rows, it changes their order. It takes a data frame and a set of column names to order by.
+
+Select is another tool that allows you to rapidly zoom in on a useful subset using operations based on names of variables. select comes with a few side helper functions:
+
+starts_with("abc"): matches names that begin with “abc”.
+ends_with("xyz"): matches names that end with “xyz”.
+contains("ijk"): matches names that contain “ijk”.
+matches("(.)\\1"): selects variables that match a regular expression. This one matches any variables that contain repeated characters.
+
+Mutate always adds new columns at the end of your dataset so we’ll start by creating a narrower dataset so we can see the new variables.Whereas if you want to keep the new variables use "transmute"
+
+Summarise is able to collapse a data frame to a single row but it is not very helpful unless you use it with "group_by", which from there you can then explore and figure things out by testing multiple systems and functions of dplyr
+
+
+##Going deeper with dplyr
+
+```{r}
+library(nycflights13)
+```
+
+besides just using select() to pick columns
+```{r}
+flights%>% select(carrier, flight)
+```
+
+you can use the minus sign to hide columns
+```{r}
+flights %>% select(-month, -day)
+```
+
+pick columns using a character vector of column names
+```{r}
+flights %>% select(flight, tailnum)
+```
+
+select() can be used to rename columns, though all columns not mentioned are dropped
+```{r}
+flights %>% select(tail = tailnum)
+```
+
+### Choosing rows: filter, between , slice, sample
+
+filter() supports the use of multiple conditions
+```{r}
+flights %>% filter(dep_time >= 600, dep_time <= 605)
+```
+
+between() is a concise alternative for determing if numeric values fall in a range. side note: is.na() can also be useful when filtering. slice() filters rows by position
+```{r}
+flights %>% filter(between(dep_time, 600, 605))
+flights %>% filter(!is.na(dep_time))
+flights %>% slice(1000:1005)
+```
+
+### Creating data frames: data_frame
+
+data_frame() is a better way than data.frame() for creating data frames. Benefits of data_frame():
+You can use previously defined columns to compute new columns.
+It never coerces column types.
+It never munges column names.
+It never adds row names.
+It only recycles length 1 input.
+It returns a local data frame (a tbl_df).
+```{r}
+data_frame(a = 1:6, b = a*2, c = 'string', 'd+e' = 1) %>% glimpse()
+```
+
+###Joining (merging) tables: left_join, right_join, inner_join, full_join, semi_join, anti_join
+
+create two simple data frames
+```{r}
+(a <- data_frame(color = c("green","yellow","red"), num = 1:3))
+```
+
+```{r}
+(b <- data_frame(color = c("green","yellow","pink"), size = c("S","M","L")))
+```
+
+only include observations found in both "a" and "b" (automatically joins on variables that appear in both tables)
+```{r}
+inner_join(a, b)
+```
+
+filter "a" to only show observations that match "b"
+```{r}
+semi_join(a, b)
+```
+
+sometimes matching variables don't have identical names
+```{r}
+b <- b %>% rename(col = color)
+```
+
+specify that the join should occur by matching "color" in "a" with "col" in "b"
+```{r}
+inner_join(a, b, by=c("color" = "col"))
+```
+
